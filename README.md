@@ -2,7 +2,7 @@
 
 
 
-# [Project Name] 🎯
+# എന്തിരൻ 3.O 🎯
 
 
 ## Basic Details
