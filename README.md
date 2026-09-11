@@ -6,13 +6,12 @@
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: DRIFT
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+- Team Lead: CHANDANADAS M - NSS COLLEGE OF ENGINEERING, PALAKKAD
+- Member 2: ABINA B ANI - NSS COLLEGE OF ENGINEERING, PALAKKADGIGI
 
 ### Project Description
 [2-3 lines about what your project does]
