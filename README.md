@@ -135,9 +135,6 @@ For Software: Diagrams:
 
 Workflow / Architecture Diagram — shown above: illustrates the full two-layer state machine from Landing Page through Behavioral Captcha (Layer 01) and OpenCV Vision Scan (Layer 02) to either Access Denied or Access Granted / Protected Website.
 (Recommended addition) A simple system architecture diagram showing: React (Vite) frontend ⇄ Flask REST API ⇄ OpenCV Bridge ⇄ existing robot_challenge.py / face_detector.py.
-
-[workflow.png](https://github.com/chandanadasm/useless_project-3.0/blob/main/workflow.png)
-
 Landing Page — hero section with "PROVE YOU ARE NOT HUMAN" headline, technical neo-brutalist styling, status badges (SYSTEM: ONLINE).
 Behavioral Captcha in progress — target-chase interaction area with live Human%/Robot% telemetry panel (cursor travel, pursuit accuracy, direction variation).
 Human Detected (Layer 01) result screen — red security-alert state shown when human score hits 100%.
@@ -160,17 +157,13 @@ Terminal showing Vite dev server running (npm run dev
 *Add caption explaining what this shows*
 
 # Diagrams
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
-
-For Hardware:
-
+![Workflow][workflow.png](https://github.com/chandanadasm/useless_project-3.0/blob/main/workflow.png)
 # Schematic & Circuit
 ![Circuit](Add your circuit diagram here)
 *Add caption explaining connections*
 
 ![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
+*Add caption explaining the schematic*s
 
 # Build Photos
 ![Components](Add photo of your components here)
