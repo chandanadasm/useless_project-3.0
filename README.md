@@ -158,6 +158,8 @@ Terminal showing Vite dev server running (npm run dev
 
 # Diagrams
 ![Workflow][workflow.png](https://github.com/chandanadasm/useless_project-3.0/blob/main/workflow.png)
+
+
 # Schematic & Circuit
 ![Circuit](Add your circuit diagram here)
 *Add caption explaining connections*
@@ -184,9 +186,8 @@ Terminal showing Vite dev server running (npm run dev
 [Add any extra demo materials/links]
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+- Chandanadas M: BACKEND
+- Abina B Ani: FRONTEND
 
 ---
 Made with ❤️ at TinkerHub Useless Projects 
