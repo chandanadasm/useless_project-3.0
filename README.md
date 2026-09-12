@@ -131,7 +131,23 @@ The existing OpenCV detection logic and reference images (robot1.jpg, robot2.jpg
 No face images, biometric templates, or cursor recordings are persisted; all verification is done live, in-session.
 
 ### Project Documentation
-For Software:
+For Software: Diagrams:
+
+Workflow / Architecture Diagram — shown above: illustrates the full two-layer state machine from Landing Page through Behavioral Captcha (Layer 01) and OpenCV Vision Scan (Layer 02) to either Access Denied or Access Granted / Protected Website.
+(Recommended addition) A simple system architecture diagram showing: React (Vite) frontend ⇄ Flask REST API ⇄ OpenCV Bridge ⇄ existing robot_challenge.py / face_detector.py.
+
+Screenshots (add at least 3 from your running app; suggested set):
+
+Landing Page — hero section with "PROVE YOU ARE NOT HUMAN" headline, technical neo-brutalist styling, status badges (SYSTEM: ONLINE).
+Behavioral Captcha in progress — target-chase interaction area with live Human%/Robot% telemetry panel (cursor travel, pursuit accuracy, direction variation).
+Human Detected (Layer 01) result screen — red security-alert state shown when human score hits 100%.
+OpenCV Vision Scanner screen — live camera feed with the "VISION MODULE ACTIVE / SCANNING..." technical overlay.
+Access Granted / Protected Website — final unlocked state with "WELCOME, MACHINE" messaging.
+
+Build/Setup screenshots (if your submission platform requests them):
+
+Terminal showing Flask backend running (python app.py, API on localhost:5000).
+Terminal showing Vite dev server running (npm run dev
 
 # Screenshots (Add at least 3)
 ![Screenshot1](Add screenshot 1 here with proper name)
