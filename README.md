@@ -81,8 +81,7 @@ For Hardware:
 
 ### Project Demo
 # Video
-[Add your demo video link here]
-*Explain what the video demonstrates*
+(https://github.com/chandanadasm/useless_project-3.0/blob/working/enthiran30-video_aNuO7yXD.mp4)
 
 # Additional Demos
 [Add any extra demo materials/links]
