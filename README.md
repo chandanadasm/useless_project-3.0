@@ -98,7 +98,7 @@ cd backend
 source venv/bin/activate   # Windows: venv\Scripts\activate
 python app.py
 
-By default this should expose the API (e.g. http://localhost:5000) including endpoints such as:
+By default this should expose the API including endpoints such as:
 
 GET  /api/status
 POST /api/start-verification
@@ -111,8 +111,6 @@ In a separate terminal:
 bash
 cd frontend
 npm run dev
-
-This will typically serve the app at http://localhost:5173.
 
 3. Open the app
 
