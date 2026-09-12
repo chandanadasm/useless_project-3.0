@@ -4,6 +4,7 @@ const MIN_SCAN_TIME_MS = 6000; // 6-second presentation delay requirement (betwe
 
 export default function OpenCVVerification({ onVerdictRobot, onVerdictHuman }) {
   const [isInitializing, setIsInitializing] = useState(true);
+  const [streamUrl, setStreamUrl] = useState('/api/video_feed');
   const [opencvStatus, setOpencvStatus] = useState({
     is_active: false,
     verdict: 'SCANNING',
@@ -29,12 +30,13 @@ export default function OpenCVVerification({ onVerdictRobot, onVerdictHuman }) {
     try {
       await fetch('/api/start-verification', { method: 'POST' });
     } catch (e) {
-      console.warn('Backend start-verification request failed, falling back to direct video stream.', e);
+      console.warn('Backend start-verification request failed.', e);
     }
     
     startTimeRef.current = Date.now();
+    setStreamUrl(`/api/video_feed?t=${Date.now()}`);
 
-    // Poll backend status endpoint
+    // Poll backend status endpoint every 300ms for live real-time metrics
     pollIntervalRef.current = setInterval(async () => {
       try {
         const res = await fetch('/api/opencv-status');
@@ -48,11 +50,11 @@ export default function OpenCVVerification({ onVerdictRobot, onVerdictHuman }) {
           if (elapsed >= MIN_SCAN_TIME_MS && !verdictHandledRef.current) {
             if (data.verdict === 'ROBOT_VERIFIED') {
               verdictHandledRef.current = true;
-              clearInterval(pollIntervalRef.current);
+              if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
               onVerdictRobot(data);
             } else if (data.verdict === 'HUMAN_DETECTED' || data.verdict === 'DENIED') {
               verdictHandledRef.current = true;
-              clearInterval(pollIntervalRef.current);
+              if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
               onVerdictHuman(data);
             }
           }
@@ -60,7 +62,7 @@ export default function OpenCVVerification({ onVerdictRobot, onVerdictHuman }) {
       } catch (err) {
         console.error('OpenCV status poll error:', err);
       }
-    }, 500);
+    }, 300);
   };
 
   useEffect(() => {
@@ -68,6 +70,13 @@ export default function OpenCVVerification({ onVerdictRobot, onVerdictHuman }) {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
     };
   }, []);
+
+  const handleImageError = () => {
+    // Retry streaming feed after brief delay if connection was momentarily interrupted
+    setTimeout(() => {
+      setStreamUrl(`/api/video_feed?t=${Date.now()}`);
+    }, 800);
+  };
 
   if (isInitializing) {
     return (
@@ -126,18 +135,15 @@ export default function OpenCVVerification({ onVerdictRobot, onVerdictHuman }) {
           overflow: 'hidden'
         }}>
           <img 
-            src="/api/video_feed" 
+            src={streamUrl} 
             alt="OpenCV Live Feed" 
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover'
+              objectFit: 'cover',
+              display: 'block'
             }}
-            onError={(e) => {
-              // Fallback preview frame if camera feed is unavailable in dev sandbox
-              e.target.onerror = null;
-              e.target.style.display = 'none';
-            }}
+            onError={handleImageError}
           />
 
           {/* HUD Targeting Overlay */}

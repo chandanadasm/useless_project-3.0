@@ -46,18 +46,33 @@ class OpenCVBridge:
                         "keypoints": keypoints,
                         "descriptors": descriptors
                     })
+                    print(f"[OpenCV Bridge] Loaded reference image: {filename} ({len(keypoints)} features)")
 
     def start_verification(self):
         with self.lock:
-            if self.is_running:
+            if self.is_running and self.camera is not None and self.camera.isOpened():
                 return True
+            
+            # Close existing if any stale camera exists
+            if self.camera is not None:
+                self.camera.release()
+                self.camera = None
+
+            # Open camera with CAP_DSHOW on Windows
             self.camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             if not self.camera.isOpened():
                 self.camera = cv2.VideoCapture(0)
+                
             if not self.camera.isOpened():
+                print("[OpenCV Bridge] ERROR: Camera device 0 could not be opened.")
                 return False
             
+            # Set 640x480 standard resolution
+            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
             self.is_running = True
+            self.current_frame = None
             self.status = {
                 "is_active": True,
                 "face_detected": False,
@@ -69,20 +84,23 @@ class OpenCVBridge:
             
             thread = threading.Thread(target=self._process_loop, daemon=True)
             thread.start()
+            print("[OpenCV Bridge] Verification session started with live camera feed.")
             return True
 
     def stop_verification(self):
         with self.lock:
             self.is_running = False
-            if self.camera:
+            if self.camera is not None:
                 self.camera.release()
                 self.camera = None
             self.status["is_active"] = False
             self.status["verdict"] = "IDLE"
+            print("[OpenCV Bridge] Camera released and verification session stopped.")
 
     def reset(self):
         self.stop_verification()
         with self.lock:
+            self.current_frame = None
             self.status = {
                 "is_active": False,
                 "face_detected": False,
@@ -99,11 +117,14 @@ class OpenCVBridge:
     def _process_loop(self):
         while True:
             with self.lock:
-                if not self.is_running or not self.camera:
+                if not self.is_running or self.camera is None:
                     break
-                success, frame = self.camera.read()
+                cam = self.camera
+
+            # Read frame OUTSIDE lock to prevent lock contention & HTTP thread starvation
+            success, frame = cam.read()
             
-            if not success:
+            if not success or frame is None:
                 time.sleep(0.03)
                 continue
             
@@ -178,15 +199,29 @@ class OpenCVBridge:
             time.sleep(0.03)
 
     def generate_mjpeg(self):
+        # Wait up to 3 seconds for initial frame to avoid premature stream termination
+        for _ in range(30):
+            with self.lock:
+                if self.current_frame is not None or not self.is_running:
+                    break
+            time.sleep(0.1)
+
         while True:
             with self.lock:
-                if not self.is_running or self.current_frame is None:
+                if not self.is_running:
                     break
-                ret, buffer = cv2.imencode('.jpg', self.current_frame)
-                if not ret:
-                    continue
-                frame_bytes = buffer.tobytes()
+                frame = self.current_frame.copy() if self.current_frame is not None else None
             
+            if frame is None:
+                time.sleep(0.03)
+                continue
+
+            ret, buffer = cv2.imencode('.jpg', frame)
+            if not ret:
+                time.sleep(0.03)
+                continue
+                
+            frame_bytes = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
             time.sleep(0.04)

@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const CHALLENGE_TEXT = 'A7K9M4';
 
-export default function ReversedCaptcha({ onCorrect, onIncorrect }) {
+export default function ReversedCaptcha({ isResultMode, onCorrectSubmit, onIncorrectSubmit, onProceedToOpenCV }) {
   const [userInput, setUserInput] = useState('');
-  const [resultState, setResultState] = useState(null); // null, 'CORRECT', 'INCORRECT'
+  const [isIncorrect, setIsIncorrect] = useState(false);
   const canvasRef = useRef(null);
 
-  // Canvas confetti burst effect for correct answer
+  // Canvas confetti burst effect for correct answer / result mode
   useEffect(() => {
-    if (resultState === 'CORRECT' && canvasRef.current) {
+    if (isResultMode && canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       canvas.width = canvas.parentElement.clientWidth;
@@ -54,18 +54,18 @@ export default function ReversedCaptcha({ onCorrect, onIncorrect }) {
       render();
       return () => cancelAnimationFrame(animId);
     }
-  }, [resultState]);
+  }, [isResultMode]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (resultState !== null) return;
+    if (isIncorrect) return;
 
     if (userInput.trim().toUpperCase() === CHALLENGE_TEXT) {
-      setResultState('CORRECT');
+      if (onCorrectSubmit) onCorrectSubmit();
     } else {
-      setResultState('INCORRECT');
+      setIsIncorrect(true);
       setTimeout(() => {
-        onIncorrect();
+        if (onIncorrectSubmit) onIncorrectSubmit();
       }, 1800);
     }
   };
@@ -82,18 +82,20 @@ export default function ReversedCaptcha({ onCorrect, onIncorrect }) {
     }}>
       <div className="hud-card" style={{ maxWidth: '580px', width: '100%', textAlign: 'center', overflow: 'hidden' }}>
         {/* Confetti Overlay Canvas */}
-        <canvas 
-          ref={canvasRef} 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            pointerEvents: 'none',
-            zIndex: 20
-          }} 
-        />
+        {isResultMode && (
+          <canvas 
+            ref={canvasRef} 
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 20
+            }} 
+          />
+        )}
 
         <h2 style={{ color: 'var(--cyan-primary)', fontSize: '2rem', marginBottom: '0.5rem' }}>
           REVERSED CAPTCHA
@@ -103,43 +105,45 @@ export default function ReversedCaptcha({ onCorrect, onIncorrect }) {
         </p>
 
         {/* Distorted Visual Noise Challenge Display */}
-        <div style={{
-          background: 'rgba(0, 0, 0, 0.6)',
-          border: '1px dashed var(--cyan-primary)',
-          borderRadius: '8px',
-          padding: '1.5rem',
-          marginBottom: '2rem',
-          position: 'relative',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          userSelect: 'none'
-        }}>
-          {/* Noise Lines SVG Overlay */}
-          <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-            <line x1="10%" y1="20%" x2="90%" y2="80%" stroke="rgba(0, 240, 255, 0.4)" strokeWidth="2" />
-            <line x1="5%" y1="75%" x2="95%" y2="30%" stroke="rgba(236, 72, 153, 0.4)" strokeWidth="2" />
-            <circle cx="30%" cy="50%" r="40" stroke="rgba(168, 85, 247, 0.2)" fill="none" strokeWidth="3" />
-          </svg>
+        {!isResultMode && !isIncorrect && (
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.6)',
+            border: '1px dashed var(--cyan-primary)',
+            borderRadius: '8px',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+            position: 'relative',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            userSelect: 'none'
+          }}>
+            {/* Noise Lines SVG Overlay */}
+            <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+              <line x1="10%" y1="20%" x2="90%" y2="80%" stroke="rgba(0, 240, 255, 0.4)" strokeWidth="2" />
+              <line x1="5%" y1="75%" x2="95%" y2="30%" stroke="rgba(236, 72, 153, 0.4)" strokeWidth="2" />
+              <circle cx="30%" cy="50%" r="40" stroke="rgba(168, 85, 247, 0.2)" fill="none" strokeWidth="3" />
+            </svg>
 
-          <div style={{ display: 'flex', gap: '15px' }}>
-            {CHALLENGE_TEXT.split('').map((char, idx) => (
-              <span key={idx} className="mono-font" style={{
-                fontSize: '2.5rem',
-                fontWeight: 'bold',
-                color: idx % 2 === 0 ? 'var(--cyan-primary)' : 'var(--magenta-accent)',
-                transform: `rotate(${(idx - 2) * 8}deg) translateY(${(idx % 2 === 0 ? -4 : 4)}px)`,
-                textShadow: '0 0 10px rgba(0,240,255,0.5)',
-                display: 'inline-block'
-              }}>
-                {char}
-              </span>
-            ))}
+            <div style={{ display: 'flex', gap: '15px' }}>
+              {CHALLENGE_TEXT.split('').map((char, idx) => (
+                <span key={idx} className="mono-font" style={{
+                  fontSize: '2.5rem',
+                  fontWeight: 'bold',
+                  color: idx % 2 === 0 ? 'var(--cyan-primary)' : 'var(--magenta-accent)',
+                  transform: `rotate(${(idx - 2) * 8}deg) translateY(${(idx % 2 === 0 ? -4 : 4)}px)`,
+                  textShadow: '0 0 10px rgba(0,240,255,0.5)',
+                  display: 'inline-block'
+                }}>
+                  {char}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Form and Result Logic */}
-        {resultState === null && (
+        {/* Form Input */}
+        {!isResultMode && !isIncorrect && (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', alignItems: 'center' }}>
             <input 
               type="text"
@@ -168,7 +172,8 @@ export default function ReversedCaptcha({ onCorrect, onIncorrect }) {
           </form>
         )}
 
-        {resultState === 'CORRECT' && (
+        {/* Correct Answer Result Card */}
+        {isResultMode && (
           <div style={{ padding: '1rem 0' }}>
             <h3 style={{ color: 'var(--green-success)', fontSize: '1.8rem', marginBottom: '0.5rem' }}>
               🎉 CONGRATULATIONS!
@@ -193,13 +198,14 @@ export default function ReversedCaptcha({ onCorrect, onIncorrect }) {
                 "Unfortunately, humans are not permitted here."
               </p>
             </div>
-            <button className="cyber-btn" onClick={onCorrect}>
+            <button className="cyber-btn" onClick={onProceedToOpenCV}>
               [ CONTINUE TO NEXT VERIFICATION ]
             </button>
           </div>
         )}
 
-        {resultState === 'INCORRECT' && (
+        {/* Incorrect Answer State */}
+        {!isResultMode && isIncorrect && (
           <div style={{ padding: '1.5rem 0' }}>
             <h3 style={{ color: 'var(--red-alert)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
               INCORRECT RESPONSE

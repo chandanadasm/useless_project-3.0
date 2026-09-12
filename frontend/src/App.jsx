@@ -57,18 +57,26 @@ export default function App() {
         <HumanDetectedAlert onProceedToCaptcha={() => transition(TRANSITION_EVENTS.PROCEED_TO_CAPTCHA)} />
       )}
 
-      {/* 6. REVERSED CAPTCHA */}
+      {/* 6. REVERSED CAPTCHA (Challenge Input) */}
       {currentState === VERIFICATION_STATES.REVERSED_CAPTCHA && (
         <ReversedCaptcha 
-          onCorrect={() => transition(TRANSITION_EVENTS.CAPTCHA_SUBMIT_CORRECT)}
-          onIncorrect={() => transition(TRANSITION_EVENTS.CAPTCHA_SUBMIT_INCORRECT)}
+          isResultMode={false}
+          onCorrectSubmit={() => transition(TRANSITION_EVENTS.CAPTCHA_SUBMIT_CORRECT)}
+          onIncorrectSubmit={() => transition(TRANSITION_EVENTS.CAPTCHA_SUBMIT_INCORRECT)}
+        />
+      )}
+
+      {/* 6b. CAPTCHA RESULT (Celebration + Access Denied Reveal) */}
+      {currentState === VERIFICATION_STATES.CAPTCHA_RESULT && (
+        <ReversedCaptcha 
+          isResultMode={true}
+          onProceedToOpenCV={() => transition(TRANSITION_EVENTS.PROCEED_TO_OPENCV)}
         />
       )}
 
       {/* 7. OPENCV INITIALIZING & SCANNING */}
       {(currentState === VERIFICATION_STATES.OPENCV_INITIALIZING || 
-        currentState === VERIFICATION_STATES.OPENCV_SCANNING ||
-        currentState === VERIFICATION_STATES.CAPTCHA_RESULT) && (
+        currentState === VERIFICATION_STATES.OPENCV_SCANNING) && (
         <OpenCVVerification 
           onVerdictRobot={() => transition(TRANSITION_EVENTS.OPENCV_VERIFIED_ROBOT)}
           onVerdictHuman={() => transition(TRANSITION_EVENTS.OPENCV_VERIFIED_HUMAN)}
